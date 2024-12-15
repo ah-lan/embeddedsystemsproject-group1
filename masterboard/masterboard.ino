@@ -116,4 +116,37 @@ void setup() {
   setupI2C();
   setupLCD();
   sei(); // Enable global interrupts
+// Read the last saved temperature and turbidity from EEPROM
+  temperatureC = (SFR_READ(0x3F + EEPROM_TEMPERATURE_ADDR) << 8) |
+                 SFR_READ(0x3F + EEPROM_TEMPERATURE_ADDR + 1);
+  turbidity = (SFR_READ(0x3F + EEPROM_TURBIDITY_ADDR) << 8) |
+              SFR_READ(0x3F + EEPROM_TURBIDITY_ADDR + 1);
+}
+
+void loop() {
+  unsigned long currentMillis = millis();
+
+  // Check if it's time to update the display
+  if (currentMillis - lastDisplayUpdate >= displayInterval) {
+    lastDisplayUpdate = currentMillis;
+
+    // Request data from Slave Boards
+    temperatureC = requestData(TEMP_SENSOR_SLAVE_ADDRESS);
+    turbidity = requestData(TURBIDITY_SENSOR_SLAVE_ADDRESS);
+
+    // Store the current data to EEPROM
+    SFR_WRITE(0x3F + EEPROM_TEMPERATURE_ADDR, (temperatureC >> 8) & 0xFF);
+    SFR_WRITE(0x3F + EEPROM_TEMPERATURE_ADDR + 1, temperatureC & 0xFF);
+    SFR_WRITE(0x3F + EEPROM_TURBIDITY_ADDR, (turbidity >> 8) & 0xFF);
+    SFR_WRITE(0x3F + EEPROM_TURBIDITY_ADDR + 1, turbidity & 0xFF);
+
+    
+    
+    if (turbidity > TURBIDITY_THRESHOLD) {
+      notifyBuzzer(true); // Notify buzzer board
+    } else {
+      notifyBuzzer(false); // Notify buzzer board
+    }
+  }
+}
 
