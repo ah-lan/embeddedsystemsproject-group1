@@ -55,3 +55,65 @@ uint16_t requestData(uint8_t slaveAddress) {
   SFR_BIT_SET(0xBC, TWINT);
   SFR_BIT_SET(0xBC, TWEN);
   while (!SFR_BIT_READ(0xBC, TWINT));
+// Send Slave Address with Read bit
+  SFR_WRITE(0xBB, (slaveAddress << 1) | TW_READ);
+  SFR_BIT_SET(0xBC, TWINT);
+  SFR_BIT_SET(0xBC, TWEN);
+  while (!SFR_BIT_READ(0xBC, TWINT));
+
+  // Read high byte of data
+  SFR_BIT_SET(0xBC, TWEA);
+  SFR_BIT_SET(0xBC, TWINT);
+  SFR_BIT_SET(0xBC, TWEN);
+  while (!SFR_BIT_READ(0xBC, TWINT));
+  data = SFR_READ(0xBB) << 8;
+
+  // Read low byte of data
+  SFR_BIT_CLEAR(0xBC, TWEA);
+  SFR_BIT_SET(0xBC, TWINT);
+  SFR_BIT_SET(0xBC, TWEN);
+  while (!SFR_BIT_READ(0xBC, TWINT));
+  data |= SFR_READ(0xBB);
+
+  // Send STOP condition
+  SFR_BIT_SET(0xBC, TWSTO);
+  SFR_BIT_SET(0xBC, TWINT);
+  SFR_BIT_SET(0xBC, TWEN);
+
+  return data;
+}
+
+void notifyBuzzer(bool dirty) {
+  // Send START condition
+  SFR_BIT_SET(0xBC, TWSTA);
+  SFR_BIT_SET(0xBC, TWINT);
+  SFR_BIT_SET(0xBC, TWEN);
+  while (!SFR_BIT_READ(0xBC, TWINT));
+
+  // Send Slave Address with Write bit
+  SFR_WRITE(0xBB, (BUZZER_SLAVE_ADDRESS << 1) | TW_WRITE);
+  SFR_BIT_SET(0xBC, TWINT);
+  SFR_BIT_SET(0xBC, TWEN);
+  while (!SFR_BIT_READ(0xBC, TWINT));
+
+  // Send buzzer status (1 for dirty, 0 for clean)
+  SFR_WRITE(0xBB, dirty ? 1 : 0);
+  SFR_BIT_SET(0xBC, TWINT);
+  SFR_BIT_SET(0xBC, TWEN);
+  while (!SFR_BIT_READ(0xBC, TWINT));
+
+  // Send STOP condition
+  SFR_BIT_SET(0xBC, TWSTO);
+  SFR_BIT_SET(0xBC, TWINT);
+  SFR_BIT_SET(0xBC, TWEN);
+}
+
+void setupLCD() {
+  // Assuming pre-configured library for LCD, no additional setup here
+}
+
+void setup() {
+  setupI2C();
+  setupLCD();
+  sei(); // Enable global interrupts
+
