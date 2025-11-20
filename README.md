@@ -5,7 +5,7 @@ It monitors **water turbidity** and **temperature**, displays readings on an LCD
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
 ### **Master Board**
 - Requests data from all slave boards via I2C  
@@ -42,7 +42,7 @@ It monitors **water turbidity** and **temperature**, displays readings on an LCD
 
 ---
 
-## 🔧 Hardware Requirements
+## Hardware Requirements
 
 - 1 × Master Arduino/ATmega board  
 - 3 × Slave Arduino/ATmega boards  
@@ -55,7 +55,7 @@ It monitors **water turbidity** and **temperature**, displays readings on an LCD
 
 ---
 
-## 🔌 System Logic
+## System Logic
 
 1. **Master polls Slave 1**  
    - Dirty water → alert ON  
@@ -74,7 +74,7 @@ It monitors **water turbidity** and **temperature**, displays readings on an LCD
 
 ---
 
-## 🛠 Changing the Temperature Threshold
+## Changing the Temperature Threshold
 
 Find this line in the master code:
 
